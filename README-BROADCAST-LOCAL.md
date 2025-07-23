@@ -4,7 +4,7 @@
 
 1. **Arranca el backend:**
    - Ejecuta: `node whatsapp-backend/server.js`
-   - El backend debe estar escuchando en `http://localhost:3000`
+   - El backend debe estar escuchando en `https://whatsapp-backend-stoe.onrender.com/api`
 
 2. **Arranca el frontend con proxy:**
    - Ejecuta: `ng serve --proxy-config proxy.conf.json` dentro de la carpeta `whatsapp-admin`
