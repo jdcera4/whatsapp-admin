@@ -16,7 +16,7 @@ import {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://whatsapp-backend-stoe.onrender.com/api/api';
+  private apiUrl = 'https://whatsapp-backend-stoe.onrender.com/api';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private whatsappConfigSubject = new BehaviorSubject<WhatsAppConfig | null>(null);
 
