@@ -1,6 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: '/api'  // Esto usará la URL base actual + /api
+  apiUrl: 'https://whatsapp-backend-stoe.onrender.com/api'  // URL del backend desplegado
 };
-</text>
-</invoke>
