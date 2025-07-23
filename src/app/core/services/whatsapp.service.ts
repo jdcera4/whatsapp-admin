@@ -4,10 +4,8 @@ import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ConversationFlow } from '../models/conversation-flow.model';
 
-// Environment configuration
-const environment = {
-  apiUrl: 'http://localhost:3000/api'
-};
+// Import environment configuration
+import { environment } from '../../../environments/environment';
 
 // ======= Interfaces =======
 export interface Contact {
@@ -117,7 +115,7 @@ interface PaginatedResponse<T> {
   providedIn: 'root'
 })
 export class WhatsappService {
-  private apiUrl = environment.apiUrl || 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
 
   // Connection status observable
   private connectionStatusSubject = new BehaviorSubject<{
@@ -333,37 +331,68 @@ export class WhatsappService {
 
   sendMessage(phone: string, message: string, mediaUrl?: string): Observable<Message> {
     const payload = { phone, message, mediaUrl };
-    return this.http.post<ApiResponse<Message>>(`${environment.apiUrl}/messages`, payload).pipe(
+    return this.http.post<ApiResponse<Message>>(`${this.apiUrl}/messages`, payload).pipe(
       map(response => response.data),
       catchError(this.handleError)
     );
   }
 
   sendExcelBroadcast(formData: FormData): Observable<ExcelBroadcastResponse> {
-    return this.http.post<ApiResponse<ExcelBroadcastResponse>>(
-      `${environment.apiUrl}/send-excel-broadcast`,
-      formData
+    console.log('Sending excel broadcast to:', `${this.apiUrl}/send-excel-broadcast`);
+    
+    // Log formData contents
+    console.log('FormData contents:');
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+    
+    return this.http.post<any>(
+      `${this.apiUrl}/send-excel-broadcast`,
+      formData,
+      {
+        headers: {
+          // No set Content-Type header, let the browser set it with the correct boundary for FormData
+        },
+        reportProgress: true
+      }
     ).pipe(
-      map(response => response.data),
-      catchError(this.handleError)
+      map(response => {
+        console.log('Excel broadcast response:', response);
+        return response.data || response;
+      }),
+      catchError(error => {
+        console.error('Error in excel broadcast:', error);
+        return throwError(() => new Error('Error al enviar mensajes: ' + (error.message || 'Error desconocido')));
+      })
     );
   }
 
   sendBroadcast(phones: string[], message: string, file?: File): Observable<{ success: boolean; message: string }> {
+    console.log('Sending broadcast to:', `${this.apiUrl}/campaigns`);
+    console.log('Phones:', phones);
+    console.log('Message:', message);
+    
     const formData = new FormData();
     formData.append('phones', JSON.stringify(phones));
     formData.append('message', message);
 
     if (file) {
+      console.log('With media file:', file.name);
       formData.append('media', file);
     }
 
-    return this.http.post<ApiResponse<{ success: boolean; message: string }>>(
+    return this.http.post<any>(
       `${this.apiUrl}/campaigns`,
       formData
     ).pipe(
-      map(response => response.data),
-      catchError(this.handleError)
+      map(response => {
+        console.log('Broadcast response:', response);
+        return response.data || response;
+      }),
+      catchError(error => {
+        console.error('Error in broadcast:', error);
+        return throwError(() => new Error('Error al enviar mensajes: ' + error.message));
+      })
     );
   }
 
@@ -421,25 +450,18 @@ export class WhatsappService {
   }> {
     console.log('🔄 Checking QR status from:', `${this.apiUrl}/qr-status`);
     
-    return this.http.get<{
-      success: boolean;
-      data: {
-        qrCode: string | null;
-        isClientReady: boolean;
-        clientInfo: any;
-        needsQR: boolean;
-      }
-    }>(`${this.apiUrl}/qr-status`)
+    return this.http.get<any>(`${this.apiUrl}/qr-status`)
       .pipe(
         map(response => {
           console.log('📱 QR Status response:', response);
           
-          if (response.success && response.data) {
+          if (response.success) {
+            // Manejar el formato de respuesta del servidor
             const result = {
-              qrCode: response.data.qrCode || undefined,
-              status: response.data.isClientReady ? 'connected' : 'disconnected',
-              connected: response.data.isClientReady,
-              needsQR: response.data.needsQR || (!response.data.isClientReady && !response.data.qrCode)
+              qrCode: response.data?.qrCode || undefined,
+              status: response.data?.isClientReady ? 'connected' : 'disconnected',
+              connected: response.data?.isClientReady || false,
+              needsQR: response.data?.needsQR || (!response.data?.isClientReady && !response.data?.qrCode)
             };
             console.log('📱 Processed QR status:', result);
             return result;

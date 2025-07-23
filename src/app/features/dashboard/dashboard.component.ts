@@ -21,7 +21,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isGeneratingQR = false;
   private qrCheckSubscription?: Subscription;
 
-  constructor(private whatsappService: WhatsappService) {}
+  constructor(private whatsappService: WhatsappService) { }
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private startQrPolling(): void {
     // Verificar QR inmediatamente
     this.checkQrStatus();
-    
+
     // Verificar QR cada 3 segundos
     this.qrCheckSubscription = interval(3000).subscribe(() => {
       this.checkQrStatus();
@@ -70,30 +70,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private checkQrStatus(): void {
     this.whatsappService.getQrStatus().subscribe({
-      next: (qrStatus) => {
+      next: (qrStatus: any) => {
         const wasConnected = this.isConnected;
         this.isConnected = qrStatus.connected || false;
         this.needsQR = qrStatus.needsQR || false;
-        this.qrData = qrStatus.qrCode || null;
-        
-        console.log('QR Status Update:', {
-          connected: this.isConnected,
-          needsQR: this.needsQR,
-          hasQR: !!this.qrData,
-          status: qrStatus.status
-        });
-        
+
+        console.log('QR Status Response:', qrStatus);
+
+        // Procesar el código QR
+        if (qrStatus.qrCode) {
+          console.log('QR Code received');
+
+          // Usar la API de Google Charts para generar el QR directamente
+          this.qrData = 'https://chart.googleapis.com/chart?cht=qr&chl=' +
+            encodeURIComponent(qrStatus.qrCode) +
+            '&chs=300x300&chld=H|0';
+        } else {
+          this.qrData = null;
+        }
+
         // Actualizar el estado en el dashboard
         if (this.status) {
           this.status.connected = this.isConnected;
         }
-        
+
         // Si cambió el estado de conexión, recargar datos
         if (wasConnected !== this.isConnected) {
           console.log('Connection status changed, reloading dashboard data');
           this.loadDashboardData();
         }
-        
+
         // Si se conectó, detener el polling del QR
         if (this.isConnected && this.qrCheckSubscription) {
           console.log('WhatsApp connected, stopping QR polling');
@@ -101,17 +107,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.qrData = null;
           this.needsQR = false;
         }
-        
+
         // Si se desconectó y no hay QR, necesita generar uno
         if (!this.isConnected && !this.qrData && !this.needsQR) {
           this.needsQR = true;
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error checking QR status:', err);
         this.isConnected = false;
         this.needsQR = true;
         this.qrData = null;
+        this.errorMsg = 'Error al obtener el estado del QR';
       }
     });
   }
@@ -130,25 +137,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.errorMsg = '';
 
     this.whatsappService.disconnect().subscribe({
-      next: (response) => {
+      next: (response: any) => {
         console.log('WhatsApp desconectado exitosamente:', response);
-        
+
         // Resetear estado inmediatamente
         this.isConnected = false;
         this.needsQR = false;
         this.qrData = null;
         this.isDisconnecting = false;
-        
+
         // Detener polling actual si existe
         if (this.qrCheckSubscription) {
           this.qrCheckSubscription.unsubscribe();
         }
-        
+
         // Mostrar mensaje de éxito
         this.errorMsg = '';
         console.log('✅ Desconexión completada. Usa "Generar Nuevo QR" para conectar otra cuenta.');
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error al desconectar WhatsApp:', error);
         this.errorMsg = 'Error al desconectar WhatsApp: ' + error.message;
         this.isDisconnecting = false;
@@ -159,35 +166,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
   generateNewQR(): void {
     this.isGeneratingQR = true;
     this.errorMsg = '';
-    
+
     console.log('Generating new QR code...');
-    
+
     this.whatsappService.generateQR().subscribe({
-      next: (response) => {
+      next: (response: any) => {
         console.log('Generate QR response:', response);
         this.isGeneratingQR = false;
-        
+
         if (response.success) {
           // Limpiar estado anterior
           this.qrData = null;
           this.isConnected = false;
           this.needsQR = true;
-          
+
           // Reiniciar el polling del QR
           if (this.qrCheckSubscription) {
             this.qrCheckSubscription.unsubscribe();
           }
           this.startQrPolling();
-          
+
           console.log('QR generation started, polling for QR code...');
-          
+
           this.errorMsg = '';
         } else {
           this.errorMsg = response.message;
           this.isGeneratingQR = false;
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error al generar QR:', error);
         this.errorMsg = 'Error al generar QR: ' + error.message;
         this.isGeneratingQR = false;

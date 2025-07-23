@@ -52,7 +52,9 @@
     
     <div class="qr-container">
       <div *ngIf="qrData; else qrLoading" class="qr-code">
+        <!-- Mostrar el QR como imagen -->
         <img [src]="qrData" alt="Código QR de WhatsApp" class="qr-image">
+        
         <div class="qr-instructions">
           <p><strong>Instrucciones:</strong></p>
           <ol>
@@ -68,6 +70,7 @@
         <div class="qr-loading">
           <div class="loading-spinner"></div>
           <span>Generando código QR...</span>
+          <p *ngIf="errorMsg" class="error-message">{{ errorMsg }}</p>
         </div>
       </ng-template>
     </div>

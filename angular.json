@@ -53,6 +53,27 @@
               ],
               "outputHashing": "all"
             },
+            "remote": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2MB",
+                  "maximumError": "5MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "20kB",
+                  "maximumError": "50kB"
+                }
+              ],
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.remote.ts"
+                }
+              ]
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -66,6 +87,9 @@
           "configurations": {
             "production": {
               "buildTarget": "whatsapp-admin:build:production"
+            },
+            "remote": {
+              "buildTarget": "whatsapp-admin:build:remote"
             },
             "development": {
               "buildTarget": "whatsapp-admin:build:development"
