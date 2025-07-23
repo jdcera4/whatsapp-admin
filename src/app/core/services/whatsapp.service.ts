@@ -453,7 +453,7 @@ export class WhatsappService {
     return this.http.get<any>(`${this.apiUrl}/qr-status`)
       .pipe(
         map(response => {
-          console.log('📱 QR Status response:', response);
+          console.log('📱 QR Status response received');
           
           if (response.success) {
             // Manejar el formato de respuesta del servidor
@@ -463,10 +463,17 @@ export class WhatsappService {
               connected: response.data?.isClientReady || false,
               needsQR: response.data?.needsQR || (!response.data?.isClientReady && !response.data?.qrCode)
             };
-            console.log('📱 Processed QR status:', result);
+            
+            // Verificar si tenemos un código QR
+            if (result.qrCode) {
+              console.log('📱 QR code received, length:', result.qrCode.length);
+            } else {
+              console.log('📱 No QR code in response');
+            }
+            
             return result;
           } else {
-            console.warn('⚠️ Invalid QR status response:', response);
+            console.warn('⚠️ Invalid QR status response');
             return { status: 'disconnected', connected: false, needsQR: true };
           }
         }),

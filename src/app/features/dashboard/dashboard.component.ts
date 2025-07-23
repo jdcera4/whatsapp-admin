@@ -81,10 +81,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (qrStatus.qrCode) {
           console.log('QR Code received');
 
-          // Usar la API de Google Charts para generar el QR directamente
-          this.qrData = 'https://chart.googleapis.com/chart?cht=qr&chl=' +
-            encodeURIComponent(qrStatus.qrCode) +
-            '&chs=300x300&chld=H|0';
+          // Verificar si el QR ya es una URL de datos completa
+          if (qrStatus.qrCode.startsWith('data:image/')) {
+            console.log('QR is already a data URL, using directly');
+            this.qrData = qrStatus.qrCode;
+          } else {
+            // Usar la API de Google Charts para generar el QR directamente
+            console.log('Converting QR code to image URL');
+            this.qrData = 'https://chart.googleapis.com/chart?cht=qr&chl=' +
+              encodeURIComponent(qrStatus.qrCode) +
+              '&chs=300x300&chld=H|0';
+          }
+          // Verificar que this.qrData no sea null antes de usar substring
+          if (this.qrData) {
+            console.log('QR Data URL:', this.qrData.substring(0, 50) + '...');
+          }
         } else {
           this.qrData = null;
         }
