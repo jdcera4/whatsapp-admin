@@ -1,0 +1,105 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background: var(--sectorial-primary);
+  padding: 0.8rem 0;
+  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.15);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-logo {
+  height: 40px;
+  width: auto;
+  // Logo mantiene sus colores originales
+}
+
+.app-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--sectorial-white);
+}
+
+.main-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.main-nav a {
+  color: var(--sectorial-white);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.main-nav a:hover {
+  background: var(--sectorial-secondary);
+  color: var(--sectorial-white);
+}
+
+.main-nav a.active {
+  background: var(--sectorial-accent);
+  color: var(--sectorial-white);
+}
+
+.app-content {
+  flex: 1;
+  max-width: 1000px;
+  margin: 2rem auto 0 auto;
+  padding: 0 1rem 2rem 1rem;
+  width: 100%;
+}
+
+.app-footer {
+  background: var(--sectorial-primary);
+  color: var(--sectorial-white);
+  text-align: center;
+  font-size: 0.95rem;
+  padding: 1.5rem 0;
+  margin-top: auto;
+  border-top: 3px solid var(--sectorial-accent);
+}
+
+@media (max-width: 700px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0 0.7rem;
+  }
+
+  .app-header h1 {
+    font-size: 1rem;
+  }
+
+  .main-nav {
+    gap: 0.6rem;
+    font-size: 0.95rem;
+  }
+
+  .app-content {
+    margin: 1rem auto 0 auto;
+    padding: 0 0.3rem 1.2rem 0.3rem;
+  }
+}
