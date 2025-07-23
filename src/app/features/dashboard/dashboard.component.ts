@@ -73,9 +73,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: (qrStatus: any) => {
         const wasConnected = this.isConnected;
         this.isConnected = qrStatus.connected || false;
-        this.needsQR = qrStatus.needsQR || false;
+        
+        // Forzar needsQR a true si hay un código QR disponible
+        this.needsQR = qrStatus.qrCode ? true : (qrStatus.needsQR || false);
 
         console.log('QR Status Response:', qrStatus);
+        console.log('needsQR set to:', this.needsQR);
 
         // Procesar el código QR
         if (qrStatus.qrCode) {
